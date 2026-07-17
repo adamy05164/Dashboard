@@ -493,6 +493,7 @@ html{scroll-behavior: auto}
   <div class="prep-scroll" id="prepScroll"></div>
 </div>
 
+<script src="rtwf-connector.js"></script>
 <script>
 (function () {
   "use strict";
@@ -601,7 +602,12 @@ function mapPreMeeting(json) {
     var p = blankPartner();
     var orgName = a.foundationName || "Unnamed Foundation";
 
-    p.id       = uniqueId(slugify(orgName));
+    // Prefer the form's own client-generated id (see rtwf-connector.js) so a
+    // post-meeting submission can link back to this exact partner via
+    // _preSubmissionId, without staff having to pick a merge target by hand.
+    p.id       = (json._submissionId && !getPartner(json._submissionId))
+      ? json._submissionId
+      : uniqueId(slugify(orgName));
     p.orgName  = orgName;
     p.orgType  = PRE_ORG_TYPE[a.orgType] || a.orgTypeOther || a.orgType || "";
     p.disease  = d.diseaseName || "";
@@ -806,7 +812,19 @@ var STAGE_STYLE = {
     return best;
   }
 
-var PARTNERS = [];
+var PARTNERS_KEY = "rtwf_partners_v1";
+  function loadPersistedPartners() {
+    try {
+      var raw = localStorage.getItem(PARTNERS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+  function persistPartners() {
+    try { localStorage.setItem(PARTNERS_KEY, JSON.stringify(PARTNERS)); }
+    catch (e) { /* private mode / quota — dashboard still works for this session */ }
+  }
+
+var PARTNERS = loadPersistedPartners();
 
   function parseLocalDate(str) {
     if (!str) return null;
@@ -2769,8 +2787,37 @@ store.subscribe(FILTER_KEYS.concat(["dataVersion"]), renderGrid);
   store.subscribe(["activePartnerId", "editMode", "dataVersion"], function () {
     if (state.activePartnerId) renderSlideOver();
   });
+  store.subscribe(["dataVersion"], persistPartners);   // keep localStorage in sync so a refresh doesn't lose imported partners
+
+// ── Form → Dashboard connector (see rtwf-connector.js) ──────────────────
+  // A post-meeting submission carries _preSubmissionId, set by the form
+  // from its own ?pid= URL param. If it matches a partner already on this
+  // dashboard, merge into that partner instead of creating a duplicate.
+  function connectorMergeTarget(rawJson) {
+    try {
+      var json = JSON.parse(rawJson);
+      if (json.formStage === "post-meeting-deep-dive" && json._preSubmissionId && getPartner(json._preSubmissionId)) {
+        return json._preSubmissionId;
+      }
+    } catch (e) { /* let importFormJson surface the parse error */ }
+    return null;
+  }
+  function absorbConnectorSubmission(rawJson) {
+    var result = importFormJson(rawJson, connectorMergeTarget(rawJson));
+    if (result.ok) {
+      var verb = result.action === "updated" ? "updated" : "added";
+      var source = result.stage === "pre-meeting-screener" ? "intake form" : "deep-dive form";
+      showToast("✓ Partner " + verb + " from " + source + ": " + result.orgName);
+    } else {
+      showToast("⚠ Auto-import failed: " + result.error, true);
+    }
+  }
 
 function init() {
+    if (window.RTWFConnector) {
+      RTWFConnector.drain(absorbConnectorSubmission);   // catch up on submissions made while this tab was closed
+      RTWFConnector.onLive(absorbConnectorSubmission);  // pick up submissions from other tabs live, no reload
+    }
     renderMetrics();
     renderChips();
     renderGrid();

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTWF Partner Screener — Before We Meet</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --navy:#162847; --navy-mid:#1a3260; --navy-soft:rgba(22,40,71,.07);
+  --blue:#185fa5; --blue-soft:#e6f0fb; --blue-border:#b5d4f4;
+  --gold:#b8842a; --gold-soft:#fdf5e7; --gold-border:#e8c88a;
+  --ink:#1c1c14; --ink-soft:#4a4840; --muted:#7a7870; --faint:#b2afa6;
+  --surface:#fff; --surface-2:#f9f7f2; --surface-3:#f3ede3;
+  --border:rgba(22,40,71,.11); --border-strong:rgba(22,40,71,.22);
+  --error:#b5493f; --error-soft:#fae8e7; --error-border:#e8a89f;
+  --success:#2e7042; --success-soft:#e8f4eb; --success-border:#a8d4b4;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px; --r-pill:999px;
+  --sh-card:0 2px 4px rgba(22,40,71,.04),0 16px 40px -8px rgba(22,40,71,.11);
+  --sh-sm:0 1px 3px rgba(22,40,71,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Avenir Next","Segoe UI Variable Display","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  font-size:14px;color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding:0 16px 64px;min-height:100vh;
+  background:
+    radial-gradient(ellipse 900px 600px at 5% 0%,rgba(22,40,71,.06) 0%,transparent 65%),
+    radial-gradient(ellipse 700px 500px at 95% 100%,rgba(184,132,42,.09) 0%,transparent 60%),
+    radial-gradient(ellipse 1100px 700px at 50% 50%,rgba(24,95,165,.04) 0%,transparent 70%),
+    #ede8de;
+}
+button,select,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:3px}
+
+/* ── Layout ── */
+.wrap{max-width:720px;margin:0 auto}
+
+/* ── Header ── */
+.form-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 16px;gap:12px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{
+  width:40px;height:40px;border-radius:10px;flex:none;
+  background:linear-gradient(135deg,var(--navy-mid),var(--navy));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;
+  letter-spacing:.5px;box-shadow:0 4px 12px rgba(22,40,71,.25);
+}
+.brand-name{font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-.01em}
+.brand-tagline{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.form-badge{
+  padding:5px 14px;border-radius:var(--r-pill);
+  background:var(--gold-soft);border:1px solid var(--gold-border);
+  color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.03em;
+  white-space:nowrap;
+}
+
+/* ── Progress ── */
+.progress-wrap{
+  position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,rgba(237,232,222,.98) 80%,transparent);
+  padding:12px 0 14px;margin-bottom:4px;
+}
+.progress-labels{display:flex;justify-content:space-between;font-size:11.5px;
+  color:var(--muted);margin-bottom:7px;font-weight:600}
+.progress-labels span:first-child{color:var(--navy);font-weight:700}
+.progress-track{height:5px;background:var(--border);border-radius:var(--r-pill);overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--navy));
+  border-radius:var(--r-pill);transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+/* ── Sheet card ── */
+.sheet{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-xl);padding:30px 32px;
+  box-shadow:var(--sh-card);
+}
+@media(max-width:560px){.sheet{padding:22px 18px}}
+
+.form-title{font-size:20px;font-weight:800;letter-spacing:-.015em;color:var(--navy);margin-bottom:6px}
+.form-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px}
+
+/* ── AI banner ── */
+.ai-banner{
+  display:flex;gap:10px;align-items:flex-start;
+  background:var(--gold-soft);border:1px solid var(--gold-border);
+  border-radius:var(--r-md);padding:10px 14px;margin-bottom:4px;
+  font-size:13px;line-height:1.5;color:var(--ink-soft);
+}
+.ai-banner-icon{color:var(--gold);font-size:15px;flex:none;margin-top:1px;font-weight:800}
+
+/* ── Section headers ── */
+.sec-h{
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--navy);border-top:1px solid var(--border);
+  padding-top:20px;margin:28px 0 18px;
+}
+.section-block:first-of-type .sec-h{border-top:none;margin-top:10px}
+.sec-icon{display:flex;align-items:center;color:var(--blue);font-size:16px}
+
+/* ── Fields ── */
+.fld{margin-bottom:20px}
+.lbl{
+  display:block;font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:8px;
+}
+.lbl-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-bottom:8px;flex-wrap:wrap;
+}
+.lbl-text{font-size:13.5px;font-weight:600;color:var(--ink)}
+.req{color:var(--error);font-weight:700}
+.hint{font-size:12px;color:var(--muted);line-height:1.45;margin:-2px 0 9px;font-weight:500}
+
+/* ── AI tag ── */
+.aitag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:700;letter-spacing:.04em;
+  color:var(--gold);background:var(--gold-soft);
+  border:1px solid var(--gold-border);
+  padding:2px 9px;border-radius:var(--r-pill);white-space:nowrap;flex:none;
+}
+
+/* ── Inputs ── */
+input,textarea{
+  width:100%;border:1.5px solid var(--border-strong);border-radius:var(--r-sm);
+  background:var(--surface);color:var(--ink);
+  padding:10px 12px;font-size:14px;font-weight:500;
+  outline:none;transition:border-color .15s ease,box-shadow .15s ease;
+}
+textarea{resize:vertical;line-height:1.55}
+input:hover,textarea:hover{border-color:var(--muted)}
+input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.13)}
+input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 0 3px rgba(181,73,63,.11)}
+
+/* ── Two-col grid ── */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+
+/* ── Chips ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+.chip{
+  position:relative;display:inline-flex;align-items:center;gap:8px;
+  min-height:36px;font-size:13px;font-weight:500;
+  color:var(--ink-soft);border:1.5px solid var(--border-strong);border-radius:var(--r-pill);
+  padding:6px 14px 6px 10px;background:var(--surface);cursor:pointer;
+  user-select:none;transition:border-color .15s,background .15s,color .15s,box-shadow .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;
+}
+.chip:hover{border-color:var(--blue);box-shadow:0 2px 6px rgba(24,95,165,.12);color:var(--ink)}
+.chip:active{transform:scale(.97)}
+.chip.sel{
+  background:var(--navy);border-color:var(--navy);
+  color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(22,40,71,.2);
+}
+.chips.group-error .chip{border-color:var(--error)}
+.chip.sq{border-radius:var(--r-sm)}
+
+/* ── Radio/checkbox indicator inside chip ── */
+.rd{
+  position:relative;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid currentColor;flex:none;background:transparent;
+  transition:border-color .15s;opacity:.6;
+}
+.chip:not(.sq) .rd::after{
+  content:'';position:absolute;inset:3px;border-radius:50%;
+  background:#fff;transform:scale(0);transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.chip.sq .rd{border-radius:4px}
+.chip.sq .rd::after{
+  content:'';position:absolute;top:50%;left:50%;
+  width:8px;height:5px;margin:-3px 0 0 -4px;
+  border-left:2px solid #fff;border-bottom:2px solid #fff;
+  transform:rotate(-45deg) scale(0);transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.chip.sel .rd{opacity:1;border-color:#fff}
+.chip:not(.sq).sel .rd::after{transform:scale(1)}
+.chip.sq.sel .rd::after{transform:rotate(-45deg) scale(1)}
+
+/* ── Conditional blocks ── */
+.conditional{
+  margin-top:10px;padding:12px 14px;
+  background:var(--surface-2);border-radius:var(--r-sm);
+  border-left:3px solid var(--blue-border);
+}
+.conditional[style*="display: none"]{margin-top:0}
+
+/* ── Error message ── */
+.field-error-msg{display:none;font-size:12px;color:var(--error);margin-top:6px;font-weight:600}
+.field-error-msg.show{display:block}
+
+/* ── Button row ── */
+.btnrow{
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:14px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);
+}
+.form-error-note{
+  display:none;align-items:center;gap:6px;
+  font-size:12.5px;color:var(--error);margin-right:auto;font-weight:600;
+}
+.form-error-note.show{display:flex}
+.form-error-note i{font-size:14px}
+.btn-submit{
+  background:linear-gradient(135deg,var(--navy-mid),var(--navy));
+  color:#fff;border:none;border-radius:var(--r-md);
+  padding:12px 24px;font:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:.01em;
+  transition:opacity .15s,transform .1s,box-shadow .15s;
+  box-shadow:0 2px 8px rgba(22,40,71,.28);
+}
+.btn-submit:hover{opacity:.9;box-shadow:0 4px 16px rgba(22,40,71,.32)}
+.btn-submit:active{transform:scale(.98)}
+.btn-submit:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* ── Confirmation panel ── */
+.confirm{
+  display:none;text-align:center;padding:36px 16px 24px;
+  animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.confirm-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--success-soft);border:2px solid var(--success-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:var(--success);margin:0 auto 18px;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) .08s both;
+}
+.confirm-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px;letter-spacing:-.01em}
+.confirm-org{
+  display:inline-block;
+  background:var(--navy-soft);color:var(--navy);
+  font-size:14px;font-weight:700;padding:5px 16px;
+  border-radius:var(--r-pill);margin-bottom:14px;
+  border:1px solid rgba(22,40,71,.14);
+}
+.confirm-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.65;max-width:440px;margin:0 auto 24px}
+.confirm-action-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:14px;flex-wrap:wrap;margin-bottom:18px;
+}
+.btn-copy{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--navy);color:#fff;border:none;border-radius:var(--r-md);
+  padding:12px 22px;font:inherit;font-size:13.5px;font-weight:700;
+  cursor:pointer;transition:background .15s,transform .1s,box-shadow .15s;
+  box-shadow:0 2px 8px rgba(22,40,71,.25);
+}
+.btn-copy:hover{background:var(--navy-mid)}
+.btn-copy:active{transform:scale(.97)}
+.copy-ok{
+  font-size:13px;font-weight:700;color:var(--success);
+  opacity:0;pointer-events:none;transition:opacity .2s ease;
+}
+.copy-ok.show{opacity:1}
+.btn-back{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--blue);background:none;border:none;
+  font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  padding:8px 0;text-decoration:underline;text-underline-offset:3px;
+}
+.btn-back:hover{color:var(--navy)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="form-header">
+    <div class="brand">
+      <div class="brand-mark">RT</div>
+      <div>
+        <div class="brand-name">RTWF</div>
+        <div class="brand-tagline">Rare disease foundation partnerships</div>
+      </div>
+    </div>
+    <div class="form-badge">Pre-Meeting Screener</div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span id="progLabel">Section 1 of 6: Main contact</span>
+      <span>~3 minutes</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+  </div>
+
+  <div class="sheet">
+    <p class="form-title">Before We Meet</p>
+    <p class="form-desc">A few quick questions so we can schedule a first meeting and start your foundation's profile. Should take about 3 minutes — we'll go deeper after we've connected.</p>
+    <div class="ai-banner">
+      <span class="ai-banner-icon">✦</span>
+      <span>Fields marked <strong>AI</strong> feed directly into your dashboard profile or the agenda for our first meeting.</span>
+    </div>
+
+    <form id="intakeForm">
+
+      <div class="section-block" data-title="Main contact">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-user" aria-hidden="true"></i></span>Main contact</div>
+        <div class="row2">
+          <div class="fld"><label class="lbl" for="firstName">First name <span class="req">*</span></label><input id="firstName" type="text" required maxlength="100" autocomplete="given-name"></div>
+          <div class="fld"><label class="lbl" for="lastName">Last name <span class="req">*</span></label><input id="lastName" type="text" required maxlength="100" autocomplete="family-name"></div>
+        </div>
+        <div class="fld"><label class="lbl" for="email">Email address <span class="req">*</span></label><input id="email" type="email" required maxlength="150" autocomplete="email"></div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Your role <span class="req">*</span></span></div>
+          <div class="chips" data-group="role" data-required="true" data-select="single" role="group" aria-label="Your role">
+            <button type="button" class="chip" data-value="Executive Director / Founder" aria-pressed="false"><span class="rd"></span>Executive Director / Founder</button>
+            <button type="button" class="chip" data-value="Board member" aria-pressed="false"><span class="rd"></span>Board member</button>
+            <button type="button" class="chip" data-value="Staff" aria-pressed="false"><span class="rd"></span>Staff</button>
+            <button type="button" class="chip" data-value="Family member / Caregiver" aria-pressed="false"><span class="rd"></span>Family member / Caregiver</button>
+            <button type="button" class="chip" data-value="Volunteer" aria-pressed="false"><span class="rd"></span>Volunteer</button>
+            <button type="button" class="chip" data-value="Other" aria-pressed="false"><span class="rd"></span>Other</button>
+          </div>
+          <div class="conditional" data-show-if="role:Other" style="display:none"><input id="roleOther" type="text" placeholder="Please specify" maxlength="100"></div>
+        </div>
+      </div>
+
+      <div class="section-block" data-title="Your foundation">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-building-community" aria-hidden="true"></i></span>Your foundation</div>
+        <div class="fld"><label class="lbl" for="foundationName">Foundation name <span class="req">*</span></label><input id="foundationName" type="text" required maxlength="150"></div>
+        <div class="fld"><label class="lbl" for="website">Website</label><input id="website" type="text" maxlength="150" placeholder="e.g. ourfoundation.org"></div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Organization type <span class="req">*</span></span><span class="aitag">AI auto-tag</span></div>
+          <div class="chips" data-group="orgType" data-required="true" data-select="single" role="group" aria-label="Organization type">
+            <button type="button" class="chip" data-value="Foundation" aria-pressed="false"><span class="rd"></span>Foundation</button>
+            <button type="button" class="chip" data-value="Family-led group" aria-pressed="false"><span class="rd"></span>Family-led group</button>
+            <button type="button" class="chip" data-value="Patient advocacy org" aria-pressed="false"><span class="rd"></span>Patient advocacy org</button>
+            <button type="button" class="chip" data-value="Research nonprofit" aria-pressed="false"><span class="rd"></span>Research nonprofit</button>
+            <button type="button" class="chip" data-value="Other" aria-pressed="false"><span class="rd"></span>Other</button>
+          </div>
+          <div class="conditional" data-show-if="orgType:Other" style="display:none"><input id="orgTypeOther" type="text" placeholder="Please specify" maxlength="100"></div>
+        </div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Country <span class="req">*</span></span></div>
+          <div class="chips" data-group="country" data-required="true" data-select="single" role="group" aria-label="Country">
+            <button type="button" class="chip" data-value="United States" aria-pressed="false"><span class="rd"></span>United States</button>
+            <button type="button" class="chip" data-value="Canada" aria-pressed="false"><span class="rd"></span>Canada</button>
+            <button type="button" class="chip" data-value="United Kingdom" aria-pressed="false"><span class="rd"></span>United Kingdom</button>
+            <button type="button" class="chip" data-value="Other" aria-pressed="false"><span class="rd"></span>Other</button>
+          </div>
+          <div class="conditional" data-show-if="country:United States" style="display:none"><input id="stateRegion" type="text" placeholder="State or region, e.g. Massachusetts"></div>
+          <div class="conditional" data-show-if="country:Other" style="display:none"><input id="countryOther" type="text" placeholder="Please specify country"></div>
+        </div>
+      </div>
+
+      <div class="section-block" data-title="The disease">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-dna" aria-hidden="true"></i></span>The disease</div>
+        <div class="row2">
+          <div class="fld"><label class="lbl" for="diseaseName">Name of the rare disease <span class="req">*</span></label><input id="diseaseName" type="text" required maxlength="150" placeholder="e.g. Batten disease, RPIA deficiency"></div>
+          <div class="fld">
+            <div class="lbl-row"><span class="lbl-text">Gene(s) affected</span><span class="aitag">AI one-pager</span></div>
+            <p class="hint">If known, e.g. CLN3, RPIA.</p>
+            <input id="geneAffected" type="text" maxlength="100" placeholder="e.g. CLN3">
+          </div>
+        </div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Is the genetic cause known?</span><span class="aitag">AI auto-tag</span></div>
+          <div class="chips" data-group="geneticCauseKnown" data-select="single" role="group" aria-label="Is the genetic cause known?">
+            <button type="button" class="chip" data-value="Yes" aria-pressed="false"><span class="rd"></span>Yes</button>
+            <button type="button" class="chip" data-value="No" aria-pressed="false"><span class="rd"></span>No</button>
+            <button type="button" class="chip" data-value="Unknown" aria-pressed="false"><span class="rd"></span>Unknown</button>
+          </div>
+        </div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Estimated people impacted</span><span class="aitag">AI auto-tag</span></div>
+          <div class="chips" data-group="populationTier" data-select="single" role="group" aria-label="Estimated people impacted">
+            <button type="button" class="chip" data-value="Unknown" aria-pressed="false"><span class="rd"></span>Unknown</button>
+            <button type="button" class="chip" data-value="0–100" aria-pressed="false"><span class="rd"></span>0–100</button>
+            <button type="button" class="chip" data-value="101–1,000" aria-pressed="false"><span class="rd"></span>101–1,000</button>
+            <button type="button" class="chip" data-value="1,001–50,000" aria-pressed="false"><span class="rd"></span>1,001–50,000</button>
+            <button type="button" class="chip" data-value="50,000–200,000" aria-pressed="false"><span class="rd"></span>50,000–200,000</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block" data-title="Research snapshot">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-microscope" aria-hidden="true"></i></span>Research snapshot</div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">What stage is your research at? <span class="req">*</span></span><span class="aitag">AI ↗ stage + agenda</span></div>
+          <div class="chips" data-group="researchStage" data-required="true" data-select="single" role="group" aria-label="What stage is your research at?">
+            <button type="button" class="chip" data-value="No research yet" aria-pressed="false"><span class="rd"></span>No research yet</button>
+            <button type="button" class="chip" data-value="Natural history study" aria-pressed="false"><span class="rd"></span>Natural history study</button>
+            <button type="button" class="chip" data-value="Preclinical" aria-pressed="false"><span class="rd"></span>Preclinical</button>
+            <button type="button" class="chip" data-value="Model / biomarker development" aria-pressed="false"><span class="rd"></span>Model / biomarker development</button>
+            <button type="button" class="chip" data-value="Clinical trial underway" aria-pressed="false"><span class="rd"></span>Clinical trial underway</button>
+            <button type="button" class="chip" data-value="Approved / ongoing treatment" aria-pressed="false"><span class="rd"></span>Approved / ongoing treatment</button>
+          </div>
+        </div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Have you connected with researchers or clinicians? <span class="req">*</span></span><span class="aitag">AI ↗ agenda</span></div>
+          <p class="hint">We'll get the details after we meet.</p>
+          <div class="chips" data-group="hasResearchContacts" data-required="true" data-select="single" role="group" aria-label="Have you connected with researchers or clinicians?">
+            <button type="button" class="chip" data-value="Yes" aria-pressed="false"><span class="rd"></span>Yes</button>
+            <button type="button" class="chip" data-value="No" aria-pressed="false"><span class="rd"></span>No</button>
+          </div>
+        </div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Do you currently fund research? <span class="req">*</span></span><span class="aitag">AI ↗ agenda</span></div>
+          <p class="hint">We'll get the details after we meet.</p>
+          <div class="chips" data-group="fundsResearch" data-required="true" data-select="single" role="group" aria-label="Do you currently fund research?">
+            <button type="button" class="chip" data-value="Yes" aria-pressed="false"><span class="rd"></span>Yes</button>
+            <button type="button" class="chip" data-value="No" aria-pressed="false"><span class="rd"></span>No</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block" data-title="Top priority">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-target" aria-hidden="true"></i></span>Top priority</div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">What would help your foundation most right now? <span class="req">*</span></span><span class="aitag">AI ↗ agenda priority</span></div>
+          <div class="chips" data-group="topSupportNeed" data-required="true" data-select="single" role="group" aria-label="What would help most?">
+            <button type="button" class="chip" data-value="Research collaboration &amp; contacts" aria-pressed="false"><span class="rd"></span>Research collaboration &amp; contacts</button>
+            <button type="button" class="chip" data-value="Funding guidance" aria-pressed="false"><span class="rd"></span>Funding guidance</button>
+            <button type="button" class="chip" data-value="Patient registry support" aria-pressed="false"><span class="rd"></span>Patient registry support</button>
+            <button type="button" class="chip" data-value="Biotech / pharma connections" aria-pressed="false"><span class="rd"></span>Biotech / pharma connections</button>
+            <button type="button" class="chip" data-value="Regulatory pathway guidance" aria-pressed="false"><span class="rd"></span>Regulatory pathway guidance</button>
+            <button type="button" class="chip" data-value="Materials &amp; literature help" aria-pressed="false"><span class="rd"></span>Materials &amp; literature help</button>
+            <button type="button" class="chip" data-value="Community &amp; family connections" aria-pressed="false"><span class="rd"></span>Community &amp; family connections</button>
+            <button type="button" class="chip" data-value="Not sure yet" aria-pressed="false"><span class="rd"></span>Not sure yet</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block" data-title="Scheduling">
+        <div class="sec-h"><span class="sec-icon"><i class="ti ti-calendar" aria-hidden="true"></i></span>Scheduling</div>
+        <div class="fld">
+          <div class="lbl-row"><span class="lbl-text">Preferred meeting timeframe <span class="req">*</span></span><span class="aitag">AI ↗ scheduling</span></div>
+          <div class="chips" data-group="timeframe" data-required="true" data-select="single" role="group" aria-label="Preferred meeting timeframe">
+            <button type="button" class="chip" data-value="As soon as possible" aria-pressed="false"><span class="rd"></span>As soon as possible</button>
+            <button type="button" class="chip" data-value="Within a month" aria-pressed="false"><span class="rd"></span>Within a month</button>
+            <button type="button" class="chip" data-value="Within a quarter" aria-pressed="false"><span class="rd"></span>Within a quarter</button>
+            <button type="button" class="chip" data-value="Flexible" aria-pressed="false"><span class="rd"></span>Flexible</button>
+          </div>
+        </div>
+        <div class="fld">
+          <label class="lbl" for="preMeetingNotes">Anything you'd like us to know before we meet?</label>
+          <p class="hint">Optional — a sentence or two is plenty.</p>
+          <textarea id="preMeetingNotes" rows="3" placeholder="Anything you'd like to flag in advance..."></textarea>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <span class="form-error-note" id="formErrorNote"><i class="ti ti-alert-circle" aria-hidden="true"></i>Please complete the highlighted fields above.</span>
+        <button class="btn-submit" type="submit">Request a meeting →</button>
+      </div>
+    </form>
+
+    <div class="confirm" id="confirmPanel">
+      <div class="confirm-icon">✓</div>
+      <h2 class="confirm-title">Received — we'll be in touch.</h2>
+      <div class="confirm-org" id="confirmOrg"></div>
+      <p class="confirm-desc">Your information has been sent to the RTWF partnerships team. We'll follow up to schedule a first meeting based on your preferred timeframe.</p>
+      <p id="connectorNote" style="display:none;font-size:12.5px;color:var(--success);font-weight:700;margin:0 0 14px;">✓ Sent straight to the dashboard — no copy/paste needed.</p>
+      <div class="confirm-action-row">
+        <button class="btn-copy" id="copyBtn" type="button"><span aria-hidden="true">📋</span> Copy data for dashboard</button>
+        <span class="copy-ok" id="copyFeedback" aria-live="polite">✓ Copied!</span>
+      </div>
+      <div id="confirmSubmissionId" style="display:none;font-size:11.5px;color:var(--muted);margin-bottom:8px;font-weight:600;font-family:monospace"></div>
+      <div id="apiWarnNote" style="display:none;font-size:12px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-border);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:12px;">⚠ Could not reach the database. Use "Copy data" and paste into the dashboard manually.</div>
+      <a id="followUpLink" class="btn-back" href="post_form.html" style="display:none;margin-bottom:8px;">Open the post-meeting follow-up form for this partner →</a>
+      <button class="btn-back" id="backBtn" type="button">← Back and edit responses</button>
+    </div>
+  </div>
+</div>
+<script src="rtwf-connector.js"></script>
+<script>
+(function(){
+  'use strict';
+  var _lastJson = '';
+  var _submittedId = '';
+
+  function makeSubmissionId() {
+    if (window.crypto && crypto.randomUUID) return 'p_' + crypto.randomUUID();
+    return 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+  var _submissionId = makeSubmissionId();
+  _submittedId = _submissionId;   // shown as the Ref ID even before/without a backend
+
+  /* ── MongoDB Atlas API Configuration ──────────────────────────────
+   * Set API_URL to your Railway backend, e.g.:
+   *   'https://rtwf-backend.up.railway.app'
+   * Leave empty to disable API submission (clipboard-only mode).
+   * API_KEY is the x-api-key value for machine-auth routes.
+   * ENDPOINT is the intake route — must accept POST without JWT.
+   * ────────────────────────────────────────────────────────────── */
+  var CONFIG = {
+    API_URL:  '',   // e.g. 'https://rtwf-backend.up.railway.app'
+    API_KEY:  '',   // your machine API key (if endpoint requires it)
+    ENDPOINT: '/api/intake/pre-meeting'
+  };
+
+  function submitToMongo(payload, onSuccess, onError) {
+    if (!CONFIG.API_URL) { onSuccess(null); return; }
+    var url = CONFIG.API_URL.replace(/\/$/, '') + CONFIG.ENDPOINT;
+    var headers = { 'Content-Type': 'application/json' };
+    if (CONFIG.API_KEY) headers['x-api-key'] = CONFIG.API_KEY;
+    fetch(url, { method: 'POST', headers: headers, body: payload })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(result) {
+        if (result && (result._id || result.submissionId)) {
+          _submittedId = result._id || result.submissionId;
+        }
+        onSuccess(result);
+      })
+      .catch(function(err) {
+        console.error('[RTWF pre-form] API error:', err);
+        onError(err);
+      });
+  }
+
+  function attachChip(chip, group){
+    chip.addEventListener('click', function(){
+      var mode = group.dataset.select || 'single';
+      if(mode === 'single'){
+        Array.prototype.forEach.call(group.querySelectorAll('.chip'), function(c){ c.classList.remove('sel'); c.setAttribute('aria-pressed','false'); });
+        chip.classList.add('sel'); chip.setAttribute('aria-pressed','true');
+      } else {
+        chip.classList.toggle('sel');
+        chip.setAttribute('aria-pressed', chip.classList.contains('sel') ? 'true' : 'false');
+      }
+      group.classList.remove('group-error');
+      updateConditionals(); updateProgress();
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.chips[data-group]'), function(g){
+    Array.prototype.forEach.call(g.querySelectorAll('.chip'), function(chip){ attachChip(chip, g); });
+  });
+
+  function getGroupValues(name){
+    var g = document.querySelector('.chips[data-group="' + name + '"]');
+    if(!g) return [];
+    return Array.prototype.map.call(g.querySelectorAll('.chip.sel'), function(c){ return c.dataset.value; });
+  }
+  function updateConditionals(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-show-if]'), function(el){
+      var parts = el.dataset.showIf.split(':');
+      var values = getGroupValues(parts[0]);
+      var wanted = parts[1].split('|');
+      el.style.display = wanted.some(function(w){ return values.indexOf(w) !== -1; }) ? '' : 'none';
+    });
+  }
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.section-block'));
+  var bar = document.getElementById('progFill'), lbl = document.getElementById('progLabel');
+  function updateProgress(){
+    var idx = 0, top = window.scrollY + 130;
+    sections.forEach(function(s, i){ if(s.offsetTop <= top) idx = i; });
+    bar.style.width = ((idx + 1) / sections.length * 100) + '%';
+    lbl.textContent = 'Section ' + (idx + 1) + ' of ' + sections.length + ': ' + sections[idx].dataset.title;
+  }
+  window.addEventListener('scroll', updateProgress, {passive:true});
+  window.addEventListener('resize', updateProgress);
+  updateConditionals(); updateProgress();
+
+  function val(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  function single(g){ return (getGroupValues(g)[0]) || ''; }
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  Array.prototype.forEach.call(document.querySelectorAll('#intakeForm input, #intakeForm textarea'), function(el){
+    el.addEventListener('input', function(){ el.classList.remove('field-error'); });
+  });
+
+  function validateForm(){
+    var first = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#intakeForm input[required]'), function(el){
+      el.classList.remove('field-error');
+      var bad = !el.value.trim() || (el.type === 'email' && !EMAIL_RE.test(el.value.trim()));
+      if(bad){ el.classList.add('field-error'); if(!first) first = el; }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.chips[data-required="true"]'), function(g){
+      g.classList.remove('group-error');
+      if(getGroupValues(g.dataset.group).length === 0){ g.classList.add('group-error'); if(!first) first = g; }
+    });
+    return first;
+  }
+
+  document.getElementById('intakeForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var errNote = document.getElementById('formErrorNote');
+    var first = validateForm();
+    if(first){
+      errNote.classList.add('show');
+      first.scrollIntoView({behavior:'smooth',block:'center'});
+      var target = first.classList.contains('chips') ? first.querySelector('.chip') : first;
+      if(target) target.focus({preventScroll:true});
+      return;
+    }
+    errNote.classList.remove('show');
+    var data = {
+      formStage: 'pre-meeting-screener',
+      submittedAt: new Date().toISOString(),
+      _submissionId: _submissionId,
+      Contact:{ firstName:val('firstName'), lastName:val('lastName'), email:val('email'), role:single('role'), roleOther:val('roleOther') },
+      Account:{ foundationName:val('foundationName'), website:val('website'), orgType:single('orgType'), orgTypeOther:val('orgTypeOther'), country:single('country'), countryOther:val('countryOther'), stateRegion:val('stateRegion') },
+      Disease:{ diseaseName:val('diseaseName'), geneAffected:val('geneAffected'), geneticCauseKnown:single('geneticCauseKnown'), populationTier:single('populationTier') },
+      Research:{ researchStage:single('researchStage'), hasResearchContacts:single('hasResearchContacts'), fundsResearch:single('fundsResearch') },
+      SupportNeeds:{ topSupportNeed:single('topSupportNeed') },
+      Meeting:{ preferredTimeframe:single('timeframe'), preMeetingNotes:val('preMeetingNotes') }
+    };
+    _lastJson = JSON.stringify(data, null, 2);
+    if (window.RTWFConnector) RTWFConnector.publish(_lastJson);
+    var orgName = data.Account.foundationName || 'Your foundation';
+    var btn = document.querySelector('.btn-submit');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    function showConnectorHandoff(){
+      if(!window.RTWFConnector) return;
+      var note = document.getElementById('connectorNote');
+      if(note) note.style.display = '';
+      var fu = document.getElementById('followUpLink');
+      if(fu){ fu.href = 'post_form.html?pid=' + encodeURIComponent(_submissionId); fu.style.display = 'inline-flex'; }
+    }
+
+    submitToMongo(_lastJson, function(result) {
+      btn.disabled = false; btn.textContent = 'Request a meeting →';
+      var confirmId = document.getElementById('confirmSubmissionId');
+      if(confirmId) { confirmId.textContent = _submittedId ? 'Ref: ' + _submittedId : ''; confirmId.style.display = _submittedId ? '' : 'none'; }
+      document.getElementById('confirmOrg').textContent = orgName;
+      document.getElementById('intakeForm').style.display = 'none';
+      document.getElementById('confirmPanel').style.display = 'block';
+      showConnectorHandoff();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }, function() {
+      btn.disabled = false; btn.textContent = 'Request a meeting →';
+      document.getElementById('confirmOrg').textContent = orgName;
+      document.getElementById('intakeForm').style.display = 'none';
+      document.getElementById('confirmPanel').style.display = 'block';
+      var apiWarn = document.getElementById('apiWarnNote');
+      if(apiWarn) apiWarn.style.display = '';
+      showConnectorHandoff();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  function doCopy(){
+    if(!_lastJson) return;
+    var fb = document.getElementById('copyFeedback'), btn = document.getElementById('copyBtn');
+    function flash(){ fb.classList.add('show'); btn.style.opacity='.65'; setTimeout(function(){ fb.classList.remove('show'); btn.style.opacity=''; }, 2400); }
+    function fallback(){ var ta = document.createElement('textarea'); ta.value = _lastJson; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); flash(); }catch(e){} ta.remove(); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(_lastJson).then(flash, fallback); } else { fallback(); }
+  }
+  document.getElementById('copyBtn').addEventListener('click', doCopy);
+  document.getElementById('backBtn').addEventListener('click', function(){
+    document.getElementById('confirmPanel').style.display = 'none';
+    document.getElementById('intakeForm').style.display = '';
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>
