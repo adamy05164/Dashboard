@@ -141,6 +141,7 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
       <span>Fields marked <strong>AI</strong> feed your dashboard profile or the AI-drafted agenda for our next meeting.</span>
     </div>
     <p id="linkedPartnerNote" style="display:none;font-size:12px;color:var(--blue);font-weight:700;margin:8px 0 0;">🔗 Linked to your existing profile (ref: <span id="linkedPartnerRef"></span>) — this will update it instead of creating a new one.</p>
+    <p id="unlinkedPartnerNote" style="display:none;font-size:12px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-border);border-radius:var(--r-sm);padding:8px 12px;margin:8px 0 0;">⚠ This page wasn't opened from a partner's follow-up link, so there's no profile to update. Use the "Open the post-meeting follow-up form" link from that partner's pre-meeting confirmation instead of this page directly.</p>
 
     <form id="intakeForm">
 
@@ -523,20 +524,19 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
   var _preId = '';
   try { _preId = new URLSearchParams(window.location.search).get('pid') || ''; } catch (e) {}
 
-  /* ── MongoDB Atlas API Configuration ──────────────────────────────
-   * Set API_URL to your Railway backend, e.g.:
-   *   'https://rtwf-backend.up.railway.app'
-   * PRE_SUBMISSION_ID: pass the _id returned by the pre-form to link
-   *   both records to the same partner in MongoDB. Auto-filled from the
-   *   ?pid= query param when this form is opened via the pre-form's
-   *   "Open the post-meeting follow-up form" link.
+  /* ── Backend API configuration ─────────────────────────────────────
+   * This form updates an EXISTING partner record (PUT /partners/:id) —
+   * the backend has no "create" path for post-meeting data alone, since
+   * a new partner requires contact/account/disease fields this form
+   * doesn't collect. _preId (from ?pid=) must be the real MongoDB _id
+   * the pre-form's POST returned, not an arbitrary string.
+   * API_KEY: same rtwf_... service key as the pre-form — see the note
+   * there on why it's visible client-side by design, not by accident.
    * Leave API_URL empty to disable API submission (clipboard-only).
    * ────────────────────────────────────────────────────────────── */
   var CONFIG = {
-    API_URL:          '',   // e.g. 'https://rtwf-backend.up.railway.app'
-    API_KEY:          '',   // your machine API key (if endpoint requires it)
-    ENDPOINT:         '/api/intake/post-meeting',
-    PRE_SUBMISSION_ID: _preId   // paste the pre-form Ref ID here to link records
+    API_URL: 'https://backend-production-8d2d.up.railway.app',
+    API_KEY: ''   // paste the rtwf_... key here
   };
 
   if (_preId) {
@@ -544,22 +544,107 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
     var linkedRef  = document.getElementById('linkedPartnerRef');
     if (linkedRef) linkedRef.textContent = _preId;
     if (linkedNote) linkedNote.style.display = '';
+  } else {
+    var unlinkedNote = document.getElementById('unlinkedPartnerNote');
+    if (unlinkedNote) unlinkedNote.style.display = '';
   }
 
-  function submitToMongo(payload, onSuccess, onError) {
+  // Shapes the form's internal JSON into the backend's partial-update
+  // shape (updatePartnerSchema) — same field names as the Partner model,
+  // real booleans, comma-separated text fields split into arrays. Keep
+  // in sync with src/routes/partners.js on the backend.
+  function resolveOther(value, otherText) {
+    return value === 'Other' && otherText ? otherText : value;
+  }
+  function resolveOtherArr(arr, otherText) {
+    if (!Array.isArray(arr)) return arr;
+    return arr.map(function(v){ return v === 'Other' && otherText ? otherText : v; });
+  }
+  function splitList(str) {
+    return str ? str.split(',').map(function(x){ return x.trim(); }).filter(Boolean) : [];
+  }
+  function buildBackendPayload(data) {
+    var c = data.Contact, a = data.Account, d = data.Disease, r = data.Research,
+        f = data.Funding, s = data.SupportNeeds, mat = data.Materials, m = data.Meeting,
+        o = data.OtherSpecify || {};
+    var region = a.region === 'International – Other' ? (a.regionOther || 'International') : (a.region || '');
+    var payload = {
+      contact: { title: c.title || '', phone: c.phone || '' },
+      account: {
+        founded: a.yearFounded || '',
+        staffSize: a.staffSize || '',
+        nonprofitStatus: resolveOther(a.nonprofitStatus || '', o.nonprofitStatusOther),
+        ein: a.ein || '',
+        region: region,
+        budget: a.operatingBudgetDetail || '',
+        collaborators: a.collaborators || '',
+        missionStatement: a.hasMission === 'Yes' ? (a.missionStatement || '') : '',
+        missionTags: resolveOtherArr(a.missionTags || [], o.missionTagsOther),
+        communitySize: a.communitySize || ''
+      },
+      disease: {
+        prevalence: d.prevalence || '',
+        category: resolveOther(d.diseaseCategory || '', o.diseaseCategoryOther),
+        inheritance: resolveOther(d.inheritance || '', o.inheritanceOther),
+        summary: d.summary || '',
+        treatment: d.treatment || '',
+        standardOfCare: d.standardOfCare || ''
+      },
+      research: {
+        hasResearchContacts: r.hasResearchContacts2 === 'Yes',
+        contactCountTier: r.contactCountTier || '',
+        contactNames: r.contactNames || '',
+        contactHelp: r.contactHelp || [],
+        activeTrials: r.activeTrialsTier || '',
+        leadInstitutions: splitList(r.leadInstitutions),
+        industryPartners: splitList(r.industryPartners),
+        fundsResearch: r.fundsResearch === 'Yes',
+        researchTypesFunded: resolveOtherArr(r.researchTypesFunded || [], o.researchTypesFundedOther),
+        registryStatus: r.registryStatus || '',
+        registryType: r.registryType || ''
+      },
+      funding: {
+        totalRaisedTier: f.fundingToDateTier || '',
+        totalRaisedDetail: f.totalRaisedDetail || '',
+        sources: resolveOtherArr(f.fundingSources || [], o.fundingSourcesOther),
+        hasOpenAsk: f.hasOpenAsk === 'Yes',
+        currentAsk: f.hasOpenAsk === 'Yes' ? (f.currentAsk || '') : '',
+        annualBudgetTier: f.annualBudgetTier || ''
+      },
+      supportNeeds: {
+        primary: resolveOtherArr(s.supportNeeds || [], o.supportNeedsOther),
+        bioPharmaStage: s.bioPharmaStage || '',
+        regulatoryStage: s.regulatoryStage || '',
+        topPriority: resolveOther(s.topPriority || '', o.supportNeedsOther),
+        notes: s.supportNotes || ''
+      },
+      materials: {
+        compileHelpRequested: !!mat.compileHelp,
+        materialsNeeded: resolveOtherArr(mat.materialsNeeded || [], o.materialsNeededOther)
+      },
+      meeting: {
+        cadence: m.meetingCadence || '',
+        additionalAttendees: m.additionalAttendees || '',
+        notes: m.additionalQuestions || ''
+      }
+    };
+    if (f.hasOpenAsk === 'Yes' && f.askDate) payload.funding.askDate = f.askDate;
+    return payload;
+  }
+
+  function submitToMongo(partnerId, payload, onSuccess, onError) {
     if (!CONFIG.API_URL) { onSuccess(null); return; }
-    var url = CONFIG.API_URL.replace(/\/$/, '') + CONFIG.ENDPOINT;
+    if (!partnerId) { onError(new Error('No linked partner id (missing ?pid=)')); return; }
+    var url = CONFIG.API_URL.replace(/\/$/, '') + '/partners/' + encodeURIComponent(partnerId);
     var headers = { 'Content-Type': 'application/json' };
     if (CONFIG.API_KEY) headers['x-api-key'] = CONFIG.API_KEY;
-    fetch(url, { method: 'POST', headers: headers, body: payload })
+    fetch(url, { method: 'PUT', headers: headers, body: payload })
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
       .then(function(result) {
-        if (result && (result._id || result.submissionId)) {
-          _submittedId = result._id || result.submissionId;
-        }
+        if (result && result._id) { _submittedId = result._id; }
         onSuccess(result);
       })
       .catch(function(err) {
@@ -746,7 +831,7 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
       Materials:{ literatureLinks:val('literatureLinks'), compileHelp:multi('compileHelp').indexOf('Yes')!==-1, materialsNeeded:multi('materialsNeeded') },
       Meeting:{ meetingCadence:single('meetingCadence'), additionalAttendees:val('additionalAttendees'), additionalQuestions:val('additionalQuestions') },
       OtherSpecify:otherSpecify,
-      _preSubmissionId: CONFIG.PRE_SUBMISSION_ID || undefined
+      _preSubmissionId: _preId || undefined
     };
     _lastJson=JSON.stringify(data, null, 2);
     if (window.RTWFConnector) RTWFConnector.publish(_lastJson);
@@ -760,7 +845,7 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
       if(note) note.style.display = '';
     }
 
-    submitToMongo(_lastJson, function(result) {
+    submitToMongo(_preId, JSON.stringify(buildBackendPayload(data)), function(result) {
       btn.disabled = false; btn.textContent = 'Save deep dive →';
       var confirmId = document.getElementById('confirmSubmissionId');
       if(confirmId) { confirmId.textContent = _submittedId ? 'Ref: ' + _submittedId : ''; confirmId.style.display = _submittedId ? '' : 'none'; }

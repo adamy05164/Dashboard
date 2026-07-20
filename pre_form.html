@@ -479,23 +479,70 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
   var _submissionId = makeSubmissionId();
   _submittedId = _submissionId;   // shown as the Ref ID even before/without a backend
 
-  /* ── MongoDB Atlas API Configuration ──────────────────────────────
-   * This page is public, so it intentionally carries no auth secret —
-   * anything embedded here is visible to anyone via "view source" and
-   * can't function as a real secret. POST /partners is meant to be a
-   * public, rate-limited write route on the backend; staff-only reads
-   * (the dashboard's GET /partners) are protected server-side instead.
+  /* ── Backend API configuration ─────────────────────────────────────
+   * POST /partners requires an X-Api-Key issued by an admin from the
+   * dashboard (Settings → API keys → "Make.com intake scenario" or
+   * similar → role "staff"). That key is scoped (can't touch user/key
+   * management or deletes) and revocable independent of anything else,
+   * but it IS visible to anyone via "view source" on this public page —
+   * that's the backend's own documented tradeoff for automation clients,
+   * not an oversight. Rotate it if you ever suspect misuse.
    * Leave API_URL empty to disable API submission (clipboard-only mode).
    * ────────────────────────────────────────────────────────────── */
   var CONFIG = {
     API_URL:  'https://backend-production-8d2d.up.railway.app',
+    API_KEY:  '',   // paste the rtwf_... key here
     ENDPOINT: '/partners'
   };
+
+  // Shapes the form's internal JSON into the backend's Partner schema:
+  // camelCase contact/account/disease/research/funding/supportNeeds/
+  // meeting objects, combined name fields, real booleans instead of
+  // "Yes"/"No" strings. Keep in sync with src/routes/partners.js
+  // (createPartnerSchema) on the backend.
+  function buildBackendPayload(data) {
+    var c = data.Contact, a = data.Account, d = data.Disease, r = data.Research,
+        s = data.SupportNeeds, m = data.Meeting;
+    return {
+      contact: {
+        name: [c.firstName, c.lastName].filter(Boolean).join(' '),
+        email: c.email,
+        role: c.role === 'Other' ? (c.roleOther || 'Other') : (c.role || '')
+      },
+      account: {
+        foundationName: a.foundationName,
+        website: a.website || '',
+        orgType: a.orgType === 'Other' ? (a.orgTypeOther || 'Other') : (a.orgType || ''),
+        country: a.country === 'Other' ? (a.countryOther || 'Other') : (a.country || ''),
+        region: a.stateRegion || ''
+      },
+      disease: {
+        name: d.diseaseName,
+        gene: d.geneAffected || '',
+        geneticCauseKnown: d.geneticCauseKnown === 'Yes',
+        populationTier: d.populationTier || ''
+      },
+      research: {
+        stage: r.researchStage || '',
+        hasResearchContacts: r.hasResearchContacts === 'Yes',
+        fundsResearch: r.fundsResearch === 'Yes'
+      },
+      supportNeeds: {
+        primary: s.topSupportNeed ? [s.topSupportNeed] : [],
+        topPriority: s.topSupportNeed || ''
+      },
+      meeting: {
+        preferredTimeframe: m.preferredTimeframe || '',
+        notes: m.preMeetingNotes || ''
+      }
+    };
+  }
 
   function submitToMongo(payload, onSuccess, onError) {
     if (!CONFIG.API_URL) { onSuccess(null); return; }
     var url = CONFIG.API_URL.replace(/\/$/, '') + CONFIG.ENDPOINT;
     var headers = { 'Content-Type': 'application/json' };
+    if (CONFIG.API_KEY) headers['x-api-key'] = CONFIG.API_KEY;
     fetch(url, { method: 'POST', headers: headers, body: payload })
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -613,10 +660,10 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
       var note = document.getElementById('connectorNote');
       if(note) note.style.display = '';
       var fu = document.getElementById('followUpLink');
-      if(fu){ fu.href = 'post_form.html?pid=' + encodeURIComponent(_submissionId); fu.style.display = 'inline-flex'; }
+      if(fu){ fu.href = 'post_form.html?pid=' + encodeURIComponent(_submittedId); fu.style.display = 'inline-flex'; }
     }
 
-    submitToMongo(_lastJson, function(result) {
+    submitToMongo(JSON.stringify(buildBackendPayload(data)), function(result) {
       btn.disabled = false; btn.textContent = 'Request a meeting →';
       var confirmId = document.getElementById('confirmSubmissionId');
       if(confirmId) { confirmId.textContent = _submittedId ? 'Ref: ' + _submittedId : ''; confirmId.style.display = _submittedId ? '' : 'none'; }
