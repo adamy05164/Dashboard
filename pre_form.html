@@ -480,18 +480,15 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
   _submittedId = _submissionId;   // shown as the Ref ID even before/without a backend
 
   /* ── MongoDB Atlas API Configuration ──────────────────────────────
-   * Set API_URL to your Railway backend, e.g.:
-   *   'https://rtwf-backend.up.railway.app'
-   * Leave empty to disable API submission (clipboard-only mode).
-   * API_KEY is the x-api-key value for machine-auth routes.
-   * ENDPOINT is the intake route — must accept POST without JWT.
+   * This page is public, so it intentionally carries no auth secret —
+   * anything embedded here is visible to anyone via "view source" and
+   * can't function as a real secret. POST /partners is meant to be a
+   * public, rate-limited write route on the backend; staff-only reads
+   * (the dashboard's GET /partners) are protected server-side instead.
+   * Leave API_URL empty to disable API submission (clipboard-only mode).
    * ────────────────────────────────────────────────────────────── */
   var CONFIG = {
     API_URL:  'https://backend-production-8d2d.up.railway.app',
-    API_KEY:  '',   // fill in your backend's real x-api-key here — do NOT paste it in chat.
-                     // Note: this file is public, so anything here is visible via "view source"
-                     // to anyone who opens the form. See the message alongside this change for
-                     // why a client-embedded secret can't really protect a public POST route.
     ENDPOINT: '/partners'
   };
 
@@ -499,7 +496,6 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
     if (!CONFIG.API_URL) { onSuccess(null); return; }
     var url = CONFIG.API_URL.replace(/\/$/, '') + CONFIG.ENDPOINT;
     var headers = { 'Content-Type': 'application/json' };
-    if (CONFIG.API_KEY) headers['x-api-key'] = CONFIG.API_KEY;
     fetch(url, { method: 'POST', headers: headers, body: payload })
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
