@@ -487,9 +487,12 @@ input.field-error,textarea.field-error{border-color:var(--error);box-shadow:0 0 
    * ENDPOINT is the intake route — must accept POST without JWT.
    * ────────────────────────────────────────────────────────────── */
   var CONFIG = {
-    API_URL:  '',   // e.g. 'https://rtwf-backend.up.railway.app'
-    API_KEY:  '',   // your machine API key (if endpoint requires it)
-    ENDPOINT: '/api/intake/pre-meeting'
+    API_URL:  'https://backend-production-8d2d.up.railway.app',
+    API_KEY:  '',   // fill in your backend's real x-api-key here — do NOT paste it in chat.
+                     // Note: this file is public, so anything here is visible via "view source"
+                     // to anyone who opens the form. See the message alongside this change for
+                     // why a client-embedded secret can't really protect a public POST route.
+    ENDPOINT: '/partners'
   };
 
   function submitToMongo(payload, onSuccess, onError) {
